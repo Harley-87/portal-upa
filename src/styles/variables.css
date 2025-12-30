@@ -1,0 +1,21 @@
+/* ARQUITETURA CSS: Variáveis Globais (:root)
+  Facilita a manutenção. Se quiser mudar o verde do site todo, muda só aqui.
+*/
+:root {
+  /* Paleta de Cores UPA Veneza */
+  --cor-primaria: #006442;
+  --cor-secundaria: #2E8B57;
+  --cor-botao-alt: #495057;
+  --cor-fundo: #f8f9fa;
+  --cor-fundo-card: #ffffff;
+  --cor-texto: #343a40;
+  --cor-texto-claro: #ffffff;
+  --cor-destaque-vermelho: #d32f2f;
+  
+  /* Efeitos */
+  --sombra-suave: 0 4px 15px rgba(0, 0, 0, 0.07);
+  --transicao-padrao: all 0.3s ease;
+  
+  /* Fontes */
+  --fonte-principal: 'Poppins', sans-serif;
+}

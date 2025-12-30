@@ -1,0 +1,29 @@
+@import './variables.css'; /* Importa as variáveis */
+
+/* Reset Básico Moderno */
+*, *::before, *::after {
+  box-sizing: border-box; /* Garante que padding não aumente o tamanho dos elementos */
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--fonte-principal);
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased; /* Renderização de fonte mais suave */
+}
+
+a { text-decoration: none; }
+
+/* Layout Principal */
+.main-content {
+  padding: 35px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Mudado de center para start para crescer com conteúdo */
+  min-height: 80vh;
+  gap: 30px;
+  flex-wrap: wrap;
+}
