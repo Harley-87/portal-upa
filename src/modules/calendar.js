@@ -180,7 +180,9 @@ async function renderCalendar() {
     const stats = calculateWorkload(year, month, holidays, currentTeam);
     
     if (stats) {
-        const saldoText = stats.balance >= 0 ? `Saldo Positivo: +${stats.balance}h` : `Devedor: ${stats.balance}h`;
+        const saldoText = stats.balance >= 0 
+            ? `Saldo Positivo: +${stats.balance}h` 
+            : `Saldo Devedor: ${stats.balance}h`;
         const colorStyle = stats.balance >= 0 ? 'color: var(--cor-primaria);' : 'color: var(--cor-destaque-vermelho);';
 
         footer.innerHTML = `

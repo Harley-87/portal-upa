@@ -1,182 +1,242 @@
 import { db, auth } from './firebase-config.js';
-// [ATUALIZADO] Adicionamos setDoc e getDoc para gerenciar permissões de usuários
 import { 
-    collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc, getDoc 
+    collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, query, orderBy, setDoc, getDoc 
 } from "firebase/firestore";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 
-// [NOVO] Variável para guardar quem é o usuário atual e o que ele pode fazer
-let currentUserRole = {}; 
+let currentUserRole = {};
 
-// --- 1. VERIFICAÇÃO DE SEGURANÇA E PERMISSÕES ---
+// ESTADO DE EDIÇÃO (Guarda os IDs que estão sendo editados)
+let editState = {
+    links: null,
+    avisos: null,
+    events: null
+};
+
+// --- 1. VERIFICAÇÃO DE SEGURANÇA ---
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
         window.location.href = "/admin.html";
     } else {
-        console.log("Usuário logado:", user.email);
-        // [ATUALIZADO] Antes de carregar os dados, verificamos as permissões
         await checkPermissions(user.email);
-        startDashboard(); // Inicia os listeners
+        startDashboard();
     }
 });
 
-document.getElementById('btnLogout').addEventListener('click', () => {
-    signOut(auth);
-});
+document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
 
-// [NOVO] Função que busca as permissões no Firestore
 async function checkPermissions(email) {
     const docRef = doc(db, "users", email);
     const docSnap = await getDoc(docRef);
-
     if (docSnap.exists()) {
-        currentUserRole = docSnap.data(); 
+        currentUserRole = docSnap.data();
     } else {
-        // Fallback: Se não tiver registro, o primeiro acesso assume admin total
-        // (Isso garante que seu email principal funcione de primeira)
         currentUserRole = { permissions: ['admin', 'links', 'avisos', 'events'] };
     }
-    
     applyInterfacePermissions();
 }
 
-// [NOVO] Função que esconde/mostra os Cards HTML baseado na permissão
 function applyInterfacePermissions() {
     const perms = currentUserRole.permissions || [];
     const isAdmin = perms.includes('admin');
-
-    // Função auxiliar para manipular o CSS display
     const show = (id, canShow) => {
         const el = document.getElementById(id);
-        // Só tenta alterar se o elemento existir na tela
-        if(el) {
-            // Se for cardUsers (Gestão de equipe), display block, senão display default (block/grid)
-            el.style.display = canShow ? 'block' : 'none';
-        }
+        if(el) el.style.display = canShow ? 'block' : 'none';
     };
-
-    // Aplica as regras visuais
-    // Nota: Estamos escondendo os Formulários ou os Cards inteiros
     show('formLink', isAdmin || perms.includes('links')); 
     show('formAviso', isAdmin || perms.includes('avisos'));
     show('cardEvents', isAdmin || perms.includes('events'));
-    show('cardUsers', isAdmin); // Só Admin vê a gestão de equipe
+    show('cardUsers', isAdmin);
 }
 
-// --- 2. INICIALIZAÇÃO DOS DADOS E LISTAGEM ---
+// --- 2. INICIALIZAÇÃO E LISTAGEM ---
 function startDashboard() {
-    
-    // Define variáveis auxiliares de permissão para usar dentro dos loops
     const perms = currentUserRole.permissions || [];
     const isAdmin = perms.includes('admin');
-    const canEditLinks = isAdmin || perms.includes('links');
-    const canEditAvisos = isAdmin || perms.includes('avisos');
-    const canEditEvents = isAdmin || perms.includes('events');
+    
+    // Configura botões de cancelar
+    setupCancelButtons();
 
     // === LINKS ===
     const qLinks = query(collection(db, "links"), orderBy("order"));
     onSnapshot(qLinks, (snapshot) => {
-        const linksList = document.getElementById('linksList');
-        // Segurança extra: se o elemento não existir na tela (usuário sem acesso), para aqui.
-        if (!linksList) return;
-
-        linksList.innerHTML = ''; 
-        if (snapshot.empty) linksList.innerHTML = '<p style="text-align:center; padding:10px;">Nenhum link.</p>';
-
+        const list = document.getElementById('linksList');
+        if (!list) return;
+        list.innerHTML = ''; 
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             const div = document.createElement('div');
             div.className = 'list-row';
             
-            // LÓGICA DE PROTEÇÃO: Só adiciona o botão se tiver permissão
-            const deleteButtonHTML = canEditLinks 
-                ? `<button class="btn-delete" data-id="${docSnap.id}">Excluir</button>` 
-                : '';
+            // Botões de Ação (Editar e Excluir)
+            let actions = '';
+            if (isAdmin || perms.includes('links')) {
+                // Passamos os dados como string JSON para o botão editar recuperar fácil
+                const dataString = JSON.stringify(data).replace(/"/g, '&quot;');
+                actions = `
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-edit" onclick='startEdit("links", "${docSnap.id}", ${dataString})' style="background:#ffc107; color:#333; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">✎</button>
+                        <button class="btn-delete" onclick="handleDelete('links', '${docSnap.id}')">X</button>
+                    </div>
+                `;
+            }
 
             div.innerHTML = `
                 <div class="item-info"><strong>${data.icon} ${data.title}</strong><small>${data.url}</small></div>
-                ${deleteButtonHTML}
+                ${actions}
             `;
             
-            // Só adiciona o listener se o botão existir
-            if (canEditLinks) {
+            // Reatribui listeners para evitar uso de string onclick no modulo
+            if (actions) {
                 div.querySelector('.btn-delete').addEventListener('click', () => handleDelete('links', docSnap.id));
+                div.querySelector('.btn-edit').addEventListener('click', () => startEdit('links', docSnap.id, data));
             }
-            
-            linksList.appendChild(div);
+            list.appendChild(div);
         });
     });
 
     // === AVISOS ===
     const qAvisos = query(collection(db, "avisos"), orderBy("order"));
     onSnapshot(qAvisos, (snapshot) => {
-        const avisosList = document.getElementById('avisosList');
-        if (!avisosList) return;
-
-        avisosList.innerHTML = '';
-        if (snapshot.empty) avisosList.innerHTML = '<p style="text-align:center; padding:10px;">Nenhum aviso.</p>';
-
+        const list = document.getElementById('avisosList');
+        if (!list) return;
+        list.innerHTML = '';
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             const div = document.createElement('div');
             div.className = 'list-row';
             
-            const deleteButtonHTML = canEditAvisos 
-                ? `<button class="btn-delete">Excluir</button>` 
-                : '';
-
-            div.innerHTML = `
-                <div class="item-info"><strong>${data.order}. ${data.title}</strong><small>${data.content.substring(0,25)}...</small></div>
-                ${deleteButtonHTML}
-            `;
-            
-            if (canEditAvisos) {
-                div.querySelector('.btn-delete').addEventListener('click', () => handleDelete('avisos', docSnap.id));
+            let actions = '';
+            if (isAdmin || perms.includes('avisos')) {
+                actions = `
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-edit" style="background:#ffc107; color:#333; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">✎</button>
+                        <button class="btn-delete">X</button>
+                    </div>
+                `;
             }
 
-            avisosList.appendChild(div);
+            // replace para limpar tags HTML da visualização da lista
+            const cleanContent = data.content.replace(/<[^>]*>?/gm, ''); 
+            
+            div.innerHTML = `
+                <div class="item-info"><strong>${data.order}. ${data.title}</strong><small>${cleanContent.substring(0,30)}...</small></div>
+                ${actions}
+            `;
+
+            if(actions) {
+                div.querySelector('.btn-delete').addEventListener('click', () => handleDelete('avisos', docSnap.id));
+                div.querySelector('.btn-edit').addEventListener('click', () => startEdit('avisos', docSnap.id, data));
+            }
+            list.appendChild(div);
         });
     });
 
     // === EVENTOS ===
     const qEvents = query(collection(db, "events"), orderBy("date"));
     onSnapshot(qEvents, (snapshot) => {
-        const eventsList = document.getElementById('eventsList');
-        if (!eventsList) return; 
-        
-        eventsList.innerHTML = '';
+        const list = document.getElementById('eventsList');
+        if (!list) return;
+        list.innerHTML = '';
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             const div = document.createElement('div');
             div.className = 'list-row';
             const dateFormatted = data.date.split('-').reverse().join('/');
             
-            const deleteButtonHTML = canEditEvents 
-                ? `<button class="btn-delete">X</button>` 
-                : '';
-
-            div.innerHTML = `
-                <div class="item-info"><strong>${dateFormatted} - ${data.title}</strong><small>${data.description || ''}</small></div>
-                ${deleteButtonHTML}
-            `;
-
-            if (canEditEvents) {
-                div.querySelector('.btn-delete').addEventListener('click', () => handleDelete('events', docSnap.id));
+            let actions = '';
+            if (isAdmin || perms.includes('events')) {
+                actions = `
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-edit" style="background:#ffc107; color:#333; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">✎</button>
+                        <button class="btn-delete">X</button>
+                    </div>
+                `;
             }
 
-            eventsList.appendChild(div);
+            div.innerHTML = `
+                <div class="item-info"><strong>${dateFormatted} - ${data.title}</strong></div>
+                ${actions}
+            `;
+            
+            if(actions) {
+                div.querySelector('.btn-delete').addEventListener('click', () => handleDelete('events', docSnap.id));
+                div.querySelector('.btn-edit').addEventListener('click', () => startEdit('events', docSnap.id, data));
+            }
+            list.appendChild(div);
         });
     });
 
-    // === GESTÃO DE USUÁRIOS (Só carrega se for Admin) ===
-    if (isAdmin) {
-        initUserManagement();
+    if (isAdmin) initUserManagement();
+}
+
+// --- 3. LÓGICA DE EDIÇÃO (START) ---
+// Essa função preenche o formulário com os dados existentes
+window.startEdit = function(type, id, data) {
+    // Salva o ID que estamos editando
+    editState[type] = id;
+
+    // Muda a interface para "Modo Edição"
+    if (type === 'links') {
+        document.getElementById('linkTitle').value = data.title;
+        document.getElementById('linkUrl').value = data.url;
+        document.getElementById('linkIcon').value = data.icon;
+        document.getElementById('linkOrder').value = data.order;
+        toggleEditMode('Link', true);
+    } 
+    else if (type === 'avisos') {
+        document.getElementById('avisoTitle').value = data.title;
+        document.getElementById('avisoContent').value = data.content;
+        document.getElementById('avisoObs').value = data.obs || '';
+        document.getElementById('avisoOrder').value = data.order;
+        toggleEditMode('Aviso', true);
+    }
+    else if (type === 'events') {
+        document.getElementById('eventDate').value = data.date;
+        document.getElementById('eventTitle').value = data.title;
+        document.getElementById('eventDesc').value = data.description || '';
+        toggleEditMode('Event', true);
+    }
+
+    // Rola a página até o formulário para o usuário ver
+    document.getElementById(`form${type === 'links' ? 'Link' : type === 'avisos' ? 'Aviso' : 'Event'}`).scrollIntoView({behavior: "smooth"});
+};
+
+// Funções para alternar botões (Adicionar <-> Salvar)
+function toggleEditMode(suffix, isEditing) {
+    const btnSubmit = document.getElementById(`btnSubmit${suffix}`);
+    const btnCancel = document.getElementById(`btnCancel${suffix}`);
+    
+    if (isEditing) {
+        btnSubmit.textContent = "Salvar Alterações";
+        btnSubmit.style.backgroundColor = "#ffc107"; // Amarelo
+        btnSubmit.style.color = "#333";
+        btnCancel.style.display = "block";
+    } else {
+        btnSubmit.textContent = suffix === 'Aviso' ? "Publicar Aviso" : `Adicionar ${suffix}`;
+        btnSubmit.style.backgroundColor = ""; // Volta ao CSS original (verde/roxo)
+        btnSubmit.style.color = "";
+        btnCancel.style.display = "none";
     }
 }
 
-// --- 3. FORMULÁRIOS DE ADIÇÃO ---
+function setupCancelButtons() {
+    ['Link', 'Aviso', 'Event'].forEach(suffix => {
+        const btn = document.getElementById(`btnCancel${suffix}`);
+        if(btn) {
+            btn.addEventListener('click', () => {
+                const type = suffix === 'Link' ? 'links' : suffix === 'Aviso' ? 'avisos' : 'events';
+                editState[type] = null; // Limpa ID
+                document.getElementById(`form${suffix}`).reset(); // Limpa Form
+                toggleEditMode(suffix, false); // Volta interface
+            });
+        }
+    });
+}
 
-// Links
+
+// --- 4. SUBMISSÃO DE FORMULÁRIOS (CREATE OU UPDATE) ---
+
 document.getElementById('formLink').addEventListener('submit', async (e) => {
     e.preventDefault();
     saveData('links', {
@@ -184,10 +244,9 @@ document.getElementById('formLink').addEventListener('submit', async (e) => {
         url: document.getElementById('linkUrl').value,
         icon: document.getElementById('linkIcon').value,
         order: Number(document.getElementById('linkOrder').value)
-    }, e.target);
+    }, e.target, 'Link');
 });
 
-// Avisos
 document.getElementById('formAviso').addEventListener('submit', async (e) => {
     e.preventDefault();
     saveData('avisos', {
@@ -195,10 +254,9 @@ document.getElementById('formAviso').addEventListener('submit', async (e) => {
         content: document.getElementById('avisoContent').value,
         obs: document.getElementById('avisoObs').value,
         order: Number(document.getElementById('avisoOrder').value)
-    }, e.target);
+    }, e.target, 'Aviso');
 });
 
-// [NOVO] Eventos
 const formEvent = document.getElementById('formEvent');
 if(formEvent) {
     formEvent.addEventListener('submit', async (e) => {
@@ -207,37 +265,73 @@ if(formEvent) {
             date: document.getElementById('eventDate').value,
             title: document.getElementById('eventTitle').value,
             description: document.getElementById('eventDesc').value
-        }, e.target);
+        }, e.target, 'Event');
     });
 }
 
-// --- [NOVO] LÓGICA DE USUÁRIOS ---
+// --- 5. FUNÇÃO MESTRE DE SALVAR (CREATE / UPDATE) ---
+async function saveData(collectionName, dataObj, formElement, uiSuffix) {
+    const btn = formElement.querySelector('button[type="submit"]');
+    const originalText = btn.textContent;
+    btn.disabled = true; btn.textContent = "Processando...";
+
+    try {
+        const editingId = editState[collectionName];
+
+        if (editingId) {
+            // MODO EDIÇÃO: Atualiza o documento existente
+            await updateDoc(doc(db, collectionName, editingId), dataObj);
+            alert("Atualizado com sucesso!");
+            // Reseta o estado
+            editState[collectionName] = null;
+            toggleEditMode(uiSuffix, false);
+        } else {
+            // MODO CRIAÇÃO: Cria um novo
+            await addDoc(collection(db, collectionName), dataObj);
+            alert("Criado com sucesso!");
+        }
+        
+        formElement.reset();
+
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao processar.");
+    } finally {
+        btn.disabled = false;
+        // Se ainda estiver editando (deu erro), mantém texto de edição, senão volta ao normal
+        if (!editState[collectionName]) {
+            btn.textContent = originalText.includes('Adicionar') || originalText.includes('Publicar') ? originalText : (uiSuffix === 'Aviso' ? "Publicar Aviso" : `Adicionar ${uiSuffix}`);
+        } else {
+            btn.textContent = "Salvar Alterações";
+        }
+    }
+}
+
+async function handleDelete(collectionName, id) {
+    if(!confirm("Tem certeza que deseja excluir?")) return;
+    try { await deleteDoc(doc(db, collectionName, id)); } catch (err) { alert("Erro ao apagar."); }
+}
+
+// (Manter initUserManagement igual estava no anterior se desejar, ou copiar do código passado)
 function initUserManagement() {
+    // ... (mesma lógica de usuários do passo anterior)
     const formUser = document.getElementById('formUser');
+    if(!formUser) return;
     
-    // Adicionar/Editar Permissões
     formUser.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('userEmail').value.trim();
-        if(!email) return;
-
         const checkboxes = formUser.querySelectorAll('input[type="checkbox"]:checked');
         const perms = Array.from(checkboxes).map(cb => cb.value);
-
         try {
-            // Usamos setDoc para criar ou sobrescrever o documento com ID = email
-            await setDoc(doc(db, "users", email), {
-                email: email,
-                permissions: perms
-            });
-            formUser.reset();
-            alert("Permissões salvas!");
-        } catch(err) { console.error(err); alert("Erro ao salvar usuário."); }
+            await setDoc(doc(db, "users", email), { email, permissions: perms });
+            formUser.reset(); alert("Permissões salvas!");
+        } catch(err) { alert("Erro ao salvar usuário."); }
     });
 
-    // Listar Usuários
     onSnapshot(collection(db, "users"), (snapshot) => {
         const list = document.getElementById('usersList');
+        if(!list) return;
         list.innerHTML = '';
         snapshot.forEach(docSnap => {
             const data = docSnap.data();
@@ -247,40 +341,10 @@ function initUserManagement() {
                 <div class="item-info"><strong>${data.email}</strong><small>${data.permissions.join(', ')}</small></div>
                 ${!data.permissions.includes('admin') ? `<button class="btn-delete">X</button>` : ''}
             `;
-            
-            // Só permite excluir se não for admin (pra você não se apagar sem querer)
             if(!data.permissions.includes('admin')) {
                 div.querySelector('.btn-delete').addEventListener('click', () => handleDelete('users', docSnap.id));
             }
             list.appendChild(div);
         });
     });
-}
-
-// --- FUNÇÕES AUXILIARES GENÉRICAS ---
-
-// Função unificada para salvar dados (Links, Avisos, Eventos)
-async function saveData(collectionName, dataObj, formElement) {
-    const btn = formElement.querySelector('button');
-    const originalText = btn.textContent;
-    btn.disabled = true; btn.textContent = "Salvando...";
-
-    try {
-        await addDoc(collection(db, collectionName), dataObj);
-        formElement.reset();
-        alert("Salvo com sucesso!");
-    } catch (error) {
-        console.error(error);
-        alert("Erro ao salvar.");
-    } finally {
-        btn.disabled = false; btn.textContent = originalText;
-    }
-}
-
-// Função unificada para deletar
-async function handleDelete(collectionName, id) {
-    if(!confirm("Tem certeza que deseja excluir?")) return;
-    try {
-        await deleteDoc(doc(db, collectionName, id));
-    } catch (err) { alert("Erro ao apagar: " + err.message); }
 }

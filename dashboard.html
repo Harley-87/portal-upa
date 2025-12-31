@@ -51,6 +51,21 @@
         }
         .btn-add:hover { background-color: var(--cor-primaria); }
 
+        /* Estilo para Botão Cancelar (Edição) */
+        .btn-cancel {
+            width: 100%;
+            background: #666;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none; /* Oculto por padrão */
+        }
+        .btn-cancel:hover { background: #444; }
+
         /* Listas de Itens */
         .item-list { margin-top: 25px; max-height: 400px; overflow-y: auto; border-top: 1px solid #eee; }
         .list-row {
@@ -98,7 +113,10 @@
                         <input type="number" id="linkOrder" class="form-control" value="1">
                     </div>
                 </div>
-                <button type="submit" class="btn-add">Adicionar Link</button>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" id="btnSubmitLink" class="btn-add">Adicionar Link</button>
+                    <button type="button" id="btnCancelLink" class="btn-cancel">Cancelar</button>
+                </div>
             </form>
 
             <div id="linksList" class="item-list">
@@ -115,6 +133,10 @@
                 </div>
                 <div class="form-group">
                     <label>Conteúdo Principal</label>
+                    
+                    <button type="button" onclick="insertBold()" style="margin-bottom: 5px; padding: 2px 8px; cursor: pointer; font-weight: bold; background: #eee; border: 1px solid #ccc; border-radius: 4px;" title="Selecionar texto e clicar">B (Negrito)</button>
+                    <p style="font-size: 0.75em; color: #888; margin: 0 0 5px 0;">Selecione o texto e clique no botão acima para destacar.</p>
+                    
                     <textarea id="avisoContent" class="form-control" rows="3" placeholder="Mensagem principal..." required></textarea>
                 </div>
                 <div class="form-group">
@@ -125,7 +147,11 @@
                     <label>Ordem de Exibição</label>
                     <input type="number" id="avisoOrder" class="form-control" value="1">
                 </div>
-                <button type="submit" class="btn-add">Publicar Aviso</button>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" id="btnSubmitAviso" class="btn-add">Publicar Aviso</button>
+                    <button type="button" id="btnCancelAviso" class="btn-cancel">Cancelar</button>
+                </div>
             </form>
 
             <div id="avisosList" class="item-list">
@@ -148,7 +174,11 @@
                     <label>Descrição</label>
                     <textarea id="eventDesc" class="form-control" rows="2" placeholder="Detalhes..."></textarea>
                 </div>
-                <button type="submit" class="btn-add">Adicionar Evento</button>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" id="btnSubmitEvent" class="btn-add">Adicionar Evento</button>
+                    <button type="button" id="btnCancelEvent" class="btn-cancel">Cancelar</button>
+                </div>
             </form>
             
             <div id="eventsList" class="item-list"></div>
@@ -180,6 +210,23 @@
         </div>
 
     </main>
+
+    <script>
+        function insertBold() {
+            const textarea = document.getElementById('avisoContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            
+            if (start === end) return; // Nada selecionado
+
+            const before = text.substring(0, start);
+            const selected = text.substring(start, end);
+            const after = text.substring(end);
+
+            textarea.value = before + '<b>' + selected + '</b>' + after;
+        }
+    </script>
 
     <script type="module" src="/src/modules/admin-dashboard.js"></script>
 </body>

@@ -8,6 +8,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      /* Esconde o site inteiramente enquanto carrega */
+      body { visibility: hidden; opacity: 0; transition: opacity 0.5s ease; }
+    </style>
   </head>
   <body>
     
@@ -15,9 +20,11 @@
       
       <section class="welcome-section">
         
-        <div class="banner-carousel" id="welcomeBanner">
-          <img src="https://i.imgur.com/88v52Ya.png" alt="Banner Institucional" class="active">
-          <img src="https://i.imgur.com/2I143tb.png" alt="Banner Avisos">
+        <div class="banner-carousel" id="welcomeBanner" style="height: 150px; overflow: hidden; position: relative;">
+    
+            <img src="/img/Logo_SESAU.png" alt="Banner Institucional" class="active" style="width: 100%; height: 100%; object-fit: contain; position: absolute; top:0; left:0;">
+            <img src="/img/Logo_UPA.png" alt="Banner Avisos" style="width: 100%; height: 100%; object-fit: contain; position: absolute; top:0; left:0;">
+
         </div>
 
         <div class="welcome-text">
@@ -27,7 +34,6 @@
 
         <section class="quick-links-section">
           <h3>Acesso Rápido</h3>
-          
           <div id="quickLinksContainer" class="links-grid">
             <p class="loading-text">Carregando links...</p>
           </div>
@@ -44,8 +50,7 @@
             <a id="muralPrev" class="mural-prev">&#10094;</a>
             <a id="muralNext" class="mural-next">&#10095;</a>
 
-            <div id="muralDots" class="mural-dots-container">
-              </div>
+            <div id="muralDots" class="mural-dots-container"></div>
           </div>
         </section>
 
@@ -89,7 +94,6 @@
             <div class="weekday-name">Qui</div>
             <div class="weekday-name">Sex</div>
             <div class="weekday-name">Sáb</div>
-            
             </div>
 
           <footer class="calendar-footer" id="calendarFooter">
@@ -106,7 +110,7 @@
         <p>UPA Jardim Veneza - Cascavel PR</p>
         
         <div class="footer-links">
-          </div>
+             </div>
 
         <div class="footer-dev">
             <span>Developed by H.F.C.®</span>
@@ -123,16 +127,20 @@
           <h3 id="modalDateTitle">Eventos do Dia</h3>
           <button id="closeModalBtn" class="btn-close">&times;</button>
         </div>
-        <div id="modalBody" class="modal-body">
-          </div>
+        <div id="modalBody" class="modal-body"></div>
       </div>
     </dialog>
 
     <a href="/admin.html" class="admin-access-link" title="Acesso Administrativo">🔒</a>
 
-<script type="module" src="/src/main.js"></script>
-</body>
-
     <script type="module" src="/src/main.js"></script>
+
+    <script>
+      // Quando a janela carregar tudo (estilos e scripts), mostra o site suavemente
+      window.addEventListener('load', () => {
+        document.body.style.visibility = 'visible';
+        document.body.style.opacity = '1';
+      });
+    </script>
   </body>
 </html>
