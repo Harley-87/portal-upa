@@ -1,0 +1,425 @@
+/* Container Principal */
+.calendar-container {
+  margin-top: 30px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden; /* Para arredondar cantos */
+}
+
+/* Cabeçalho (Mês e Botões) */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: var(--cor-primaria);
+  color: #fff;
+}
+
+.calendar-navigation {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.calendar-navigation h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-transform: capitalize; /* Primeira letra maiúscula */
+  min-width: 180px; /* Evita que o layout pule quando muda o nome do mês */
+  text-align: center;
+}
+
+.nav-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+  transition: var(--transicao-padrao);
+}
+
+.nav-btn:hover { background: rgba(255, 255, 255, 0.4); }
+
+/* Legenda */
+.calendar-legend {
+  display: flex;
+  gap: 10px;
+  font-size: 0.8rem;
+}
+.legend-item::before {
+  content: '';
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+.legend-item.holiday::before { background-color: var(--cor-destaque-vermelho); }
+.legend-item.today::before { background-color: var(--cor-secundaria); }
+
+/* GRID DO CALENDÁRIO */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* 7 colunas iguais */
+  gap: 1px;
+  background-color: #e0e0e0; /* Cor das linhas da grade */
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Cabeçalho dos dias da semana (Dom, Seg...) */
+.weekday-name {
+  background-color: #f1f3f5;
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* Células dos Dias (1, 2, 3...) */
+.calendar-day {
+  background-color: #fff;
+  min-height: 80px; /* Altura de cada dia */
+  padding: 8px;
+  position: relative;
+  font-size: 0.95rem;
+  color: var(--cor-texto);
+  transition: background-color 0.2s;
+}
+
+.calendar-day:hover { background-color: #f9f9f9; }
+
+/* Estilos Especiais */
+.calendar-day.today {
+  background-color: #e8f5e9; /* Verde bem claro */
+  font-weight: bold;
+  border: 2px solid var(--cor-secundaria); /* Borda verde */
+}
+
+.calendar-day.padding-day {
+  background-color: #fcfcfc;
+  color: #ccc; /* Dias do mês anterior/próximo */
+}
+
+.calendar-day.is-holiday {
+  color: var(--cor-destaque-vermelho);
+}
+
+/* Badge de Feriado (Texto pequeno dentro do dia) */
+.holiday-name {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--cor-destaque-vermelho);
+  margin-top: 4px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+/* Footer */
+.calendar-footer {
+  padding: 15px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+  background-color: #fafafa;
+}
+
+/* --- CONTROLES DE ESCALA --- */
+.calendar-controls {
+  padding: 15px 20px;
+  background-color: #f1f3f5;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-controls select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: var(--fonte-principal);
+  font-size: 0.9rem;
+  flex-grow: 1;
+  max-width: 300px;
+  cursor: pointer;
+}
+
+/* --- ESTILOS DO PLANTÃO (A mágica visual) --- */
+.calendar-day.shift-day {
+  background-color: #d1e7dd; /* Verde clarinho (Bootstrap success-light) */
+  color: #0f5132;
+  border: 2px solid #badbcc;
+  font-weight: bold;
+}
+
+/* Bolinha indicadora (opcional, para ficar chique) */
+.calendar-day.shift-day::after {
+  content: 'Plantão';
+  display: block;
+  font-size: 0.65rem;
+  background-color: var(--cor-secundaria);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 5px;
+  text-align: center;
+  width: fit-content;
+}
+
+/* Rodapé de Resumo de Horas */
+.workload-summary {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+  padding: 10px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.workload-item strong { display: block; font-size: 1.1em; color: var(--cor-primaria); }
+
+/* --- LINKS RÁPIDOS --- */
+.quick-links-section {
+  width: 100%;
+  max-width: 900px; /* Um pouco mais largo que o banner */
+  margin: 0 auto 20px auto;
+  text-align: center;
+}
+
+.quick-links-section h3 {
+  color: var(--cor-primaria);
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #e0e0e0;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.links-grid {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.btn-quick-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: var(--cor-texto);
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  min-width: 150px;
+  justify-content: center;
+  text-decoration: none; /* Importante para links <a> */
+}
+
+.btn-quick-link:hover {
+  border-color: var(--cor-secundaria);
+  color: var(--cor-primaria);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.loading-text {
+  font-size: 0.85rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* --- MURAL DE AVISOS --- */
+.mural-section {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto 30px auto;
+  display: flex;
+  justify-content: center;
+}
+
+.card-aviso {
+  background-color: #ffffff;
+  border: 2px solid var(--cor-secundaria);
+  border-radius: 10px;
+  padding: 20px;
+  width: 100%;
+  text-align: left;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  position: relative;
+  /* Animação suave na borda */
+  animation: pulse-border 3s infinite;
+}
+
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(46, 139, 87, 0.2); }
+  50% { box-shadow: 0 0 0 6px rgba(46, 139, 87, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 139, 87, 0); }
+}
+
+.card-aviso h3 {
+  color: var(--cor-primaria);
+  text-align: center;
+  font-size: 1.2em;
+  text-transform: uppercase;
+  border-bottom: 1px dashed #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.destaque-importante { color: var(--cor-destaque-vermelho); }
+
+/* Área dos Slides */
+.mural-slide-container {
+  position: relative;
+  min-height: 180px; /* Altura mínima para não pular */
+}
+
+.mural-slide {
+  display: none; /* Escondido por padrão */
+  animation: fadeEffect 0.8s;
+}
+
+.mural-slide.active { display: block; } /* O JS vai adicionar essa classe */
+
+@keyframes fadeEffect {
+  from {opacity: 0.4} to {opacity: 1}
+}
+
+/* Conteúdo do Aviso */
+.aviso-conteudo p { margin-bottom: 10px; text-align: justify; }
+.aviso-conteudo strong { color: var(--cor-primaria); }
+
+.obs-texto {
+  font-size: 0.85em;
+  color: #555;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-left: 4px solid var(--cor-primaria);
+  margin-top: 15px;
+}
+
+/* Botões de Navegação (Setas) */
+.mural-prev, .mural-next {
+  cursor: pointer;
+  position: absolute;
+  top: 55%; /* Ajuste fino */
+  width: auto;
+  padding: 10px;
+  margin-top: -22px;
+  color: var(--cor-secundaria);
+  font-weight: bold;
+  font-size: 24px;
+  transition: 0.3s;
+  user-select: none;
+}
+.mural-prev { left: -10px; }
+.mural-next { right: -10px; }
+.mural-prev:hover, .mural-next:hover { color: var(--cor-primaria); transform: scale(1.2); }
+
+/* Bolinhas (Dots) */
+.mural-dots-container {
+  text-align: center;
+  margin-top: 15px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+.mural-dot {
+  cursor: pointer;
+  height: 10px; width: 10px;
+  margin: 0 4px;
+  background-color: #ddd;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.3s;
+}
+.mural-dot.active { background-color: var(--cor-primaria); }
+
+/* --- ESTILOS DE EVENTOS NO CALENDÁRIO --- */
+.calendar-day.has-event {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Bolinha indicadora de evento */
+.calendar-day.has-event::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--cor-destaque-vermelho); /* Laranja/Vermelho */
+  border-radius: 50%;
+  box-shadow: 0 0 2px rgba(0,0,0,0.3);
+  z-index: 2;
+}
+
+/* --- MODAL NATIVO --- */
+.modal-evento {
+  border: none;
+  border-radius: 10px;
+  padding: 0;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  width: 90%;
+  max-width: 400px;
+  
+  /* --- CORREÇÃO DE CENTRALIZAÇÃO --- */
+  position: fixed;       /* Flutua na tela */
+  top: 50%;              /* 50% do topo */
+  left: 50%;             /* 50% da esquerda */
+  transform: translate(-50%, -50%); /* Puxa de volta metade do próprio tamanho para centralizar exato */
+  margin: 0;             /* Remove margens padrão do navegador */
+  max-height: 90vh;      /* Garante que não estoure a altura em telas pequenas */
+}
+
+.modal-evento::backdrop {
+  background: rgba(0, 0, 0, 0.5); /* Fundo escuro atrás */
+}
+
+.modal-header {
+  background: var(--cor-primaria);
+  color: white;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-close {
+  background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;
+}
+
+.modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; }
+
+.event-item {
+  background: #f9f9f9;
+  border-left: 4px solid var(--cor-secundaria);
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.event-item h4 { margin: 0 0 5px 0; color: #333; font-size: 1em; }
+.event-item p { margin: 0; font-size: 0.9em; color: #666; }
+
+/* Link Discreto de Admin */
+.admin-access-link {
+  position: fixed;
+  bottom: 10px; right: 10px;
+  opacity: 0.3;
+  font-size: 1.2rem;
+  text-decoration: none;
+  filter: grayscale(100%);
+  transition: 0.3s;
+}
+.admin-access-link:hover { opacity: 1; filter: none; }

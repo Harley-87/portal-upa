@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Portal UPA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos simplificados para o Admin (Inline para facilitar agora) */
+        body { font-family: 'Poppins', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .admin-container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #006442; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #004d32; }
+        .error { color: red; font-size: 0.9em; margin-top: 10px; display: none; }
+        h2 { color: #333; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <h2>🔒 Acesso Restrito</h2>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="E-mail" required>
+            <input type="password" id="password" placeholder="Senha" required>
+            <button type="submit" id="loginBtn">Entrar</button>
+            <p id="errorMessage" class="error"></p>
+        </form>
+    </div>
+
+    <script type="module" src="/src/modules/admin-login.js"></script>
+</body>
+</html>

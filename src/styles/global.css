@@ -27,3 +27,35 @@ a { text-decoration: none; }
   gap: 30px;
   flex-wrap: wrap;
 }
+
+/* Atualize a classe .footer existente */
+.footer {
+  background-color: #343a40;
+  color: #adb5bd;
+  text-align: center;
+  padding: 30px 15px;
+  margin-top: 50px;
+  font-size: 0.9em;
+  border-top: 4px solid var(--cor-primaria);
+}
+
+.footer-dev {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #495057;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  font-size: 0.8em;
+}
+
+.btn-report {
+  color: #adb5bd;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: 0.3s;
+}
+.btn-report:hover { color: #fff; }

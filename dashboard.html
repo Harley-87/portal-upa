@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - UPA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./src/styles/variables.css">
+    <style>
+        /* CSS Inline Específico do Painel para não misturar com o site público */
+        body { font-family: 'Poppins', sans-serif; background-color: #f0f2f5; margin: 0; padding-bottom: 50px; }
+        
+        .admin-header {
+            background-color: var(--cor-primaria);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .btn-logout { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-logout:hover { background: rgba(255,255,255,0.3); }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Duas colunas */
+            gap: 30px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .admin-card h2 { color: var(--cor-primaria); border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+
+        /* Formulários */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9em; color: #555; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-family: inherit; }
+        
+        .btn-add {
+            width: 100%; background-color: var(--cor-secundaria); color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s;
+        }
+        .btn-add:hover { background-color: var(--cor-primaria); }
+
+        /* Listas de Itens */
+        .item-list { margin-top: 25px; max-height: 400px; overflow-y: auto; border-top: 1px solid #eee; }
+        .list-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px; border-bottom: 1px solid #f0f0f0; background: #fff;
+        }
+        .list-row:nth-child(even) { background: #fafafa; }
+        
+        .item-info strong { display: block; color: #333; }
+        .item-info small { color: #888; }
+        
+        .btn-delete { background: #fee; color: #d32f2f; border: 1px solid #ffcccc; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; }
+        .btn-delete:hover { background: #d32f2f; color: white; }
+
+        @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <header class="admin-header">
+        <h3>Painel Administrativo UPA</h3>
+        <button id="btnLogout" class="btn-logout">Sair do Sistema</button>
+    </header>
+
+    <main class="dashboard-grid">
+        
+        <div class="admin-card">
+            <h2>🔗 Links Rápidos</h2>
+            <form id="formLink">
+                <div class="form-group">
+                    <label>Título do Botão</label>
+                    <input type="text" id="linkTitle" class="form-control" placeholder="Ex: Portal do Servidor" required>
+                </div>
+                <div class="form-group">
+                    <label>URL (Link)</label>
+                    <input type="url" id="linkUrl" class="form-control" placeholder="https://..." required>
+                </div>
+                <div class="form-group" style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label>Ícone (Emoji)</label>
+                        <input type="text" id="linkIcon" class="form-control" placeholder="🔗" value="🔗">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Ordem</label>
+                        <input type="number" id="linkOrder" class="form-control" value="1">
+                    </div>
+                </div>
+                <button type="submit" class="btn-add">Adicionar Link</button>
+            </form>
+
+            <div id="linksList" class="item-list">
+                <p style="text-align:center; color:#999; margin-top:20px">Carregando...</p>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <h2>📢 Mural de Avisos</h2>
+            <form id="formAviso">
+                <div class="form-group">
+                    <label>Título do Aviso</label>
+                    <input type="text" id="avisoTitle" class="form-control" placeholder="Ex: Assinatura de Ponto" required>
+                </div>
+                <div class="form-group">
+                    <label>Conteúdo Principal</label>
+                    <textarea id="avisoContent" class="form-control" rows="3" placeholder="Mensagem principal..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Observação (Opcional)</label>
+                    <input type="text" id="avisoObs" class="form-control" placeholder="Ex: Prazo até sexta-feira">
+                </div>
+                <div class="form-group">
+                    <label>Ordem de Exibição</label>
+                    <input type="number" id="avisoOrder" class="form-control" value="1">
+                </div>
+                <button type="submit" class="btn-add">Publicar Aviso</button>
+            </form>
+
+            <div id="avisosList" class="item-list">
+                <p style="text-align:center; color:#999; margin-top:20px">Carregando...</p>
+            </div>
+        </div>
+
+        <div class="admin-card" id="cardEvents">
+            <h2>📅 Eventos do Calendário</h2>
+            <form id="formEvent">
+                <div class="form-group">
+                    <label>Data do Evento</label>
+                    <input type="date" id="eventDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Título Curto</label>
+                    <input type="text" id="eventTitle" class="form-control" placeholder="Ex: Reunião Geral" required>
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="eventDesc" class="form-control" rows="2" placeholder="Detalhes..."></textarea>
+                </div>
+                <button type="submit" class="btn-add">Adicionar Evento</button>
+            </form>
+            
+            <div id="eventsList" class="item-list"></div>
+        </div>
+
+        <div class="admin-card" id="cardUsers" style="display:none; border: 2px solid #006442;">
+            <h2>👥 Equipe de Editores</h2>
+            <p style="font-size:0.8em; color:#666;">
+                Nota: Crie o Login (Email/Senha) no Console do Firebase. Aqui você define as permissões.
+            </p>
+            <form id="formUser">
+                <div class="form-group">
+                    <label>E-mail do Usuário (Exato)</label>
+                    <input type="email" id="userEmail" class="form-control" placeholder="editor@upa.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Permissões</label>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <label><input type="checkbox" value="links"> Links</label>
+                        <label><input type="checkbox" value="avisos"> Avisos</label>
+                        <label><input type="checkbox" value="events"> Eventos</label>
+                        <label><input type="checkbox" value="admin"> <strong>SUPER ADMIN</strong></label>
+                    </div>
+                </div>
+                <button type="submit" class="btn-add" style="background-color:#333;">Salvar Permissões</button>
+            </form>
+
+            <div id="usersList" class="item-list"></div>
+        </div>
+
+    </main>
+
+    <script type="module" src="/src/modules/admin-dashboard.js"></script>
+</body>
+</html>

@@ -25,17 +25,113 @@
           <p>Utilize o painel abaixo para consultar escalas, feriados e avisos importantes.</p>
         </div>
 
-        <div id="app-dashboard" style="margin-top: 30px; border: 2px dashed #ccc; padding: 20px; color: #777;">
-           O Calendário e as Escalas serão carregados aqui na próxima fase.
+        <section class="quick-links-section">
+          <h3>Acesso Rápido</h3>
+          
+          <div id="quickLinksContainer" class="links-grid">
+            <p class="loading-text">Carregando links...</p>
+          </div>
+        </section>
+
+        <section class="mural-section">
+          <div class="card-aviso">
+            <h3>Mural de Avisos <strong class="destaque-importante">Importantes!</strong></h3>
+            
+            <div id="muralContainer" class="mural-slide-container">
+              <p class="loading-text">Carregando avisos...</p>
+            </div>
+
+            <a id="muralPrev" class="mural-prev">&#10094;</a>
+            <a id="muralNext" class="mural-next">&#10095;</a>
+
+            <div id="muralDots" class="mural-dots-container">
+              </div>
+          </div>
+        </section>
+
+        <div class="calendar-container">
+
+          <div class="calendar-controls">
+            <label for="teamSelector">Visualizar Escala:</label>
+            <select id="teamSelector">
+              <option value="">-- Selecione sua Equipe --</option>
+              
+              <optgroup label="Regime 12x36 (Dia sim, Dia não)">
+                <option value="12x36-1">Equipe D1 / N1 (Ímpar/Par)</option>
+                <option value="12x36-2">Equipe D2 / N2 (Par/Ímpar)</option>
+              </optgroup>
+
+              <optgroup label="Regime 12x60 (Plantão a cada 3 dias)">
+                <option value="12x60-1">Equipe A (D1/N1)</option>
+                <option value="12x60-2">Equipe B (D2/N2)</option>
+                <option value="12x60-3">Equipe C (D3/N3)</option>
+              </optgroup>
+            </select>
+          </div>
+  
+          <header class="calendar-header">
+            <div class="calendar-navigation">
+              <button id="btnPrevMonth" class="nav-btn" aria-label="Mês Anterior">&lt;</button>
+              <h2 id="currentMonthDisplay">Carregando...</h2>
+              <button id="btnNextMonth" class="nav-btn" aria-label="Próximo Mês">&gt;</button>
+            </div>
+            <div class="calendar-legend">
+              <span class="legend-item holiday">Feriado</span>
+              <span class="legend-item today">Hoje</span>
+            </div>
+          </header>
+
+          <div class="calendar-grid" id="calendarGrid">
+            <div class="weekday-name">Dom</div>
+            <div class="weekday-name">Seg</div>
+            <div class="weekday-name">Ter</div>
+            <div class="weekday-name">Qua</div>
+            <div class="weekday-name">Qui</div>
+            <div class="weekday-name">Sex</div>
+            <div class="weekday-name">Sáb</div>
+            
+            </div>
+
+          <footer class="calendar-footer" id="calendarFooter">
+            <p>Selecione uma escala para ver os dias de trabalho.</p>
+          </footer>
+
         </div>
 
       </section>
 
     </main>
 
-    <footer style="text-align: center; padding: 20px; font-size: 0.9em; color: #666;">
-      <p>UPA Jardim Veneza - Cascavel PR &copy; 2025</p>
+    <footer class="footer">
+        <p>UPA Jardim Veneza - Cascavel PR</p>
+        
+        <div class="footer-links">
+          </div>
+
+        <div class="footer-dev">
+            <span>Developed by H.F.C.®</span>
+            <span>|</span>
+            <a href="mailto:admharleyc@gmail.com?subject=Sugestão Portal UPA" class="btn-report" title="Relatar Problema">
+                🐞 Sugerir Melhoria
+            </a>
+        </div>
     </footer>
+
+    <dialog id="eventModal" class="modal-evento">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalDateTitle">Eventos do Dia</h3>
+          <button id="closeModalBtn" class="btn-close">&times;</button>
+        </div>
+        <div id="modalBody" class="modal-body">
+          </div>
+      </div>
+    </dialog>
+
+    <a href="/admin.html" class="admin-access-link" title="Acesso Administrativo">🔒</a>
+
+<script type="module" src="/src/main.js"></script>
+</body>
 
     <script type="module" src="/src/main.js"></script>
   </body>
