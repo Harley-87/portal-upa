@@ -360,7 +360,7 @@
   right: 5px;
   width: 8px;
   height: 8px;
-  background-color: var(--cor-destaque-vermelho); /* Laranja/Vermelho */
+  background-color: #007bff; /* Azul */
   border-radius: 50%;
   box-shadow: 0 0 2px rgba(0,0,0,0.3);
   z-index: 2;
@@ -424,6 +424,27 @@
 }
 .admin-access-link:hover { opacity: 1; filter: none; }
 
+/* --- LEGENDA DE INSTRUÇÃO DO CALENDÁRIO --- */
+.event-instruction {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px; /* Espaço entre a bolinha e o texto */
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 0.85rem;
+    color: #666; /* Cinza suave */
+}
+
+/* Cria a bolinha de exemplo na legenda */
+.dot-sample {
+    width: 8px;
+    height: 8px;
+    background-color: #007bff; /* O MESMO AZUL que você escolheu acima */
+    border-radius: 50%;
+    display: inline-block;
+}
+
 /* --- RESPONSIVIDADE DO CALENDÁRIO (MOBILE) --- */
 @media (max-width: 768px) {
 
@@ -438,9 +459,12 @@
      Assim, o cabeçalho verde, o seletor e os dias esticam juntos. */
   .calendar-grid, 
   .calendar-header, 
-  .calendar-controls {
-    min-width: 600px; /* Largura mínima para não quebrar o layout */
-    width: 100%;      /* Garante que ocupem espaço se a tela for maior que 600px */
+  .calendar-controls,
+  .event-instruction,      /* <--- NOVO: Legenda também estica */
+  .workload-summary,
+  .calendar-footer {      /* <--- IMPORTANTE: Rodapé também deve esticar se tiver */
+    min-width: 600px;      /* Largura mínima para manter a proporção */
+    width: 100%;
   }
 
   /* 3. Ajustes internos do Cabeçalho para Mobile */
