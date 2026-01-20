@@ -429,31 +429,36 @@
 
   /* 1. Ajusta o Container Principal para permitir rolagem */
   .calendar-container {
-    overflow-x: auto; /* Cria barra de rolagem horizontal se precisar */
-    -webkit-overflow-scrolling: touch; /* Rolagem suave no iOS */
+    overflow-x: auto; /* Cria barra de rolagem horizontal */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px; /* Um respiro para a barra de rolagem não colar */
   }
 
-  /* 2. Ajusta o Cabeçalho (Mês e Legenda) */
+  /* 2. O GRANDE TRUQUE: Forçar todos os elementos a terem a mesma largura mínima.
+     Assim, o cabeçalho verde, o seletor e os dias esticam juntos. */
+  .calendar-grid, 
+  .calendar-header, 
+  .calendar-controls {
+    min-width: 600px; /* Largura mínima para não quebrar o layout */
+    width: 100%;      /* Garante que ocupem espaço se a tela for maior que 600px */
+  }
+
+  /* 3. Ajustes internos do Cabeçalho para Mobile */
   .calendar-header {
-    flex-direction: column; /* Empilha os itens verticalmente */
-    gap: 15px;
-    align-items: center; /* Centraliza tudo */
+    flex-direction: column; /* Empilha mês e legenda se necessário, mas mantendo a largura */
+    gap: 10px;
+    align-items: center;
     text-align: center;
+    /* Garante que o fundo verde preencha tudo */
+    box-sizing: border-box; 
   }
 
   .calendar-navigation {
     width: 100%;
-    justify-content: space-between; /* Espalha os botões e o mês */
+    justify-content: space-between;
   }
 
-  /* 3. Ajusta o Grid (A mágica da rolagem) */
-  .calendar-grid {
-    /* Define uma largura mínima para o calendário não ficar esmagado.
-       Se a tela for menor que 600px, vai aparecer a barra de rolagem. */
-    min-width: 600px; 
-  }
-
-  /* Ajuste opcional: diminuir um pouco a fonte e padding dos dias no mobile */
+  /* 4. Ajustes visuais para caber melhor */
   .calendar-day, .weekday-name {
     font-size: 0.85rem;
     padding: 5px;
@@ -461,24 +466,23 @@
   .calendar-day { min-height: 70px; }
   .holiday-name { font-size: 0.6rem; }
 
-  /* 4. Ajusta o Rodapé (Resumo de Horas) */
+  /* 5. Ajusta o Rodapé (Resumo de Horas) */
   .workload-summary {
-    flex-direction: column; /* Empilha os itens */
+    flex-direction: column;
     gap: 10px;
+    min-width: 600px; /* O rodapé também precisa acompanhar a largura */
   }
 
   .workload-item {
-    /* Cria uma linha para cada item, com o título na esquerda e valor na direita */
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    border-bottom: 1px solid #eee; /* Linha separadora */
+    border-bottom: 1px solid #eee;
     padding-bottom: 5px;
     font-size: 1rem;
   }
   
-  /* Remove a borda do último item para ficar bonito */
   .workload-item:last-child {
     border-bottom: none;
   }
