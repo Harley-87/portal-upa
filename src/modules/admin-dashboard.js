@@ -10,7 +10,8 @@ let currentUserRole = {};
 let editState = {
     links: null,
     avisos: null,
-    events: null
+    events: null,
+    users: null
 };
 
 // --- 1. VERIFICAÇÃO DE SEGURANÇA ---
@@ -46,7 +47,7 @@ function applyInterfacePermissions() {
     show('formLink', isAdmin || perms.includes('links')); 
     show('formAviso', isAdmin || perms.includes('avisos'));
     show('cardEvents', isAdmin || perms.includes('events'));
-    show('cardUsers', isAdmin);
+    show('cardUsers', isAdmin); // Só admin vê gestão de usuários
 }
 
 // --- 2. INICIALIZAÇÃO E LISTAGEM ---
@@ -197,8 +198,26 @@ window.startEdit = function(type, id, data) {
         document.getElementById('eventDesc').value = data.description || '';
         toggleEditMode('Event', true);
     }
+    else if (type === 'users') {
+        const emailInput = document.getElementById('userEmail');
+        emailInput.value = id; // O ID é o email
+        emailInput.disabled = true; // Trava o email para não editar a chave primária
+        
+        // 1. Limpa todos os checkboxes antes
+        document.querySelectorAll('#formUser input[type="checkbox"]').forEach(cb => cb.checked = false);
+        
+        // 2. Marca apenas os que o usuário tem
+        if (data.permissions) {
+            data.permissions.forEach(perm => {
+                const cb = document.querySelector(`#formUser input[value="${perm}"]`);
+                if(cb) cb.checked = true;
+            });
+        }
+        toggleEditMode('User', true);
+    }
 
     // Rola a página até o formulário para o usuário ver
+    const formId = type === 'users' ? 'formUser' : `form${type === 'links' ? 'Link' : type === 'avisos' ? 'Aviso' : 'Event'}`;
     document.getElementById(`form${type === 'links' ? 'Link' : type === 'avisos' ? 'Aviso' : 'Event'}`).scrollIntoView({behavior: "smooth"});
 };
 
@@ -213,22 +232,35 @@ function toggleEditMode(suffix, isEditing) {
         btnSubmit.style.color = "#333";
         btnCancel.style.display = "block";
     } else {
-        btnSubmit.textContent = suffix === 'Aviso' ? "Publicar Aviso" : `Adicionar ${suffix}`;
-        btnSubmit.style.backgroundColor = ""; // Volta ao CSS original (verde/roxo)
+        // Volta o texto original dependendo do tipo
+        if (suffix === 'Aviso') btnSubmit.textContent = "Publicar Aviso";
+        else if (suffix === 'User') btnSubmit.textContent = "Salvar Permissões";
+        else btnSubmit.textContent = `Adicionar ${suffix}`;
+
+        btnSubmit.style.backgroundColor = suffix === 'User' ? "#333" : ""; // Mantém cinza se for user
         btnSubmit.style.color = "";
         btnCancel.style.display = "none";
+
+        // Se for User, destrava o campo de e-mail ao sair da edição
+        if (suffix === 'User') {
+            const emailInput = document.getElementById('userEmail');
+            if(emailInput) emailInput.disabled = false;
+        }
     }
 }
 
 function setupCancelButtons() {
-    ['Link', 'Aviso', 'Event'].forEach(suffix => {
+    // Adicionei 'User' na lista abaixo
+    ['Link', 'Aviso', 'Event', 'User'].forEach(suffix => {
         const btn = document.getElementById(`btnCancel${suffix}`);
         if(btn) {
             btn.addEventListener('click', () => {
-                const type = suffix === 'Link' ? 'links' : suffix === 'Aviso' ? 'avisos' : 'events';
-                editState[type] = null; // Limpa ID
-                document.getElementById(`form${suffix}`).reset(); // Limpa Form
-                toggleEditMode(suffix, false); // Volta interface
+                // Mapeia o Suffix para o nome da coleção no editState
+                const type = suffix === 'Link' ? 'links' : suffix === 'Aviso' ? 'avisos' : (suffix === 'User' ? 'users' : 'events');
+                
+                editState[type] = null; // Limpa ID da memória
+                document.getElementById(`form${suffix}`).reset(); // Limpa visual do form
+                toggleEditMode(suffix, false); // Volta botões ao normal
             });
         }
     });
@@ -312,23 +344,41 @@ async function handleDelete(collectionName, id) {
     try { await deleteDoc(doc(db, collectionName, id)); } catch (err) { alert("Erro ao apagar."); }
 }
 
-// (Manter initUserManagement igual estava no anterior se desejar, ou copiar do código passado)
 function initUserManagement() {
-    // ... (mesma lógica de usuários do passo anterior)
     const formUser = document.getElementById('formUser');
     if(!formUser) return;
     
-    formUser.addEventListener('submit', async (e) => {
+    // Configura o submit do formulário
+    // Removemos listener antigo clonando o elemento (para não duplicar se rodar 2x)
+    const newForm = formUser.cloneNode(true);
+    formUser.parentNode.replaceChild(newForm, formUser);
+    
+    // Como trocamos o elemento HTML, precisamos reativar o botão cancelar dele
+    setupCancelButtons(); 
+
+    newForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('userEmail').value.trim();
-        const checkboxes = formUser.querySelectorAll('input[type="checkbox"]:checked');
+        const checkboxes = newForm.querySelectorAll('input[type="checkbox"]:checked');
         const perms = Array.from(checkboxes).map(cb => cb.value);
+        
         try {
+            // Salva ou Atualiza (Sobrescreve permissões)
             await setDoc(doc(db, "users", email), { email, permissions: perms });
-            formUser.reset(); alert("Permissões salvas!");
-        } catch(err) { alert("Erro ao salvar usuário."); }
+            alert("Permissões salvas!");
+            
+            // Limpeza pós-salvamento
+            newForm.reset();
+            editState.users = null;
+            toggleEditMode('User', false); // Destrava email e esconde botão cancelar
+            
+        } catch(err) { 
+            console.error(err);
+            alert("Erro ao salvar usuário."); 
+        }
     });
 
+    // Configura a Lista de Usuários
     onSnapshot(collection(db, "users"), (snapshot) => {
         const list = document.getElementById('usersList');
         if(!list) return;
@@ -337,13 +387,29 @@ function initUserManagement() {
             const data = docSnap.data();
             const div = document.createElement('div');
             div.className = 'list-row';
+            
+            // Prepara os dados para o botão editar
+            const dataString = JSON.stringify(data).replace(/"/g, '&quot;');
+            
+            // Cria os botões (Editar sempre aparece, Excluir só se não for Admin)
+            const actions = `
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-edit" onclick='startEdit("users", "${docSnap.id}", ${dataString})' style="background:#ffc107; color:#333; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">✎</button>
+                    ${!data.permissions.includes('admin') ? `<button class="btn-delete" onclick="handleDelete('users', '${docSnap.id}')">X</button>` : ''}
+                </div>
+            `;
+
             div.innerHTML = `
                 <div class="item-info"><strong>${data.email}</strong><small>${data.permissions.join(', ')}</small></div>
-                ${!data.permissions.includes('admin') ? `<button class="btn-delete">X</button>` : ''}
+                ${actions}
             `;
-            if(!data.permissions.includes('admin')) {
-                div.querySelector('.btn-delete').addEventListener('click', () => handleDelete('users', docSnap.id));
-            }
+            
+            // Re-ativa os listeners dos botões que acabamos de criar via HTML string
+            const btnEdit = div.querySelector('.btn-edit');
+            const btnDel = div.querySelector('.btn-delete');
+            if(btnEdit) btnEdit.onclick = () => startEdit('users', docSnap.id, data);
+            if(btnDel) btnDel.onclick = () => handleDelete('users', docSnap.id);
+            
             list.appendChild(div);
         });
     });

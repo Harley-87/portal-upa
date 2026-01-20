@@ -203,7 +203,10 @@
                         <label><input type="checkbox" value="admin"> <strong>SUPER ADMIN</strong></label>
                     </div>
                 </div>
-                <button type="submit" class="btn-add" style="background-color:#333;">Salvar Permissões</button>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" id="btnSubmitUser" class="btn-add" style="background-color:#333;">Salvar Permissões</button>
+                    <button type="button" id="btnCancelUser" class="btn-cancel" style="display: none; background: #666; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; margin-top: 10px;">Cancelar</button>
+                </div>
             </form>
 
             <div id="usersList" class="item-list"></div>
