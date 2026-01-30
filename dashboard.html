@@ -134,8 +134,14 @@
                 <div class="form-group">
                     <label>Conteúdo Principal</label>
                     
-                    <button type="button" onclick="insertBold()" style="margin-bottom: 5px; padding: 2px 8px; cursor: pointer; font-weight: bold; background: #eee; border: 1px solid #ccc; border-radius: 4px;" title="Selecionar texto e clicar">B (Negrito)</button>
-                    <p style="font-size: 0.75em; color: #888; margin: 0 0 5px 0;">Selecione o texto e clique no botão acima para destacar.</p>
+                    <div style="margin-bottom: 5px; display: flex; gap: 5px;">
+                        <button type="button" onclick="formatText('bold')" style="padding: 2px 10px; font-weight: bold; cursor: pointer;" title="Negrito">B</button>
+                        
+                        <button type="button" onclick="formatText('red')" style="padding: 2px 10px; color: red; font-weight: bold; cursor: pointer;" title="Texto Vermelho">A</button>
+                        
+                        <button type="button" onclick="formatText('list')" style="padding: 2px 10px; cursor: pointer;" title="Criar Lista">≣ Lista</button>
+                    </div>
+                    <p style="font-size: 0.75em; color: #888; margin: 0 0 5px 0;">Selecione o texto e clique nos botões acima para formatar.</p>
                     
                     <textarea id="avisoContent" class="form-control" rows="3" placeholder="Mensagem principal..." required></textarea>
                 </div>
@@ -215,19 +221,40 @@
     </main>
 
     <script>
-        function insertBold() {
+        // Função unificada para formatar texto (Negrito, Cor, Lista)
+        function formatText(type) {
             const textarea = document.getElementById('avisoContent');
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
             const text = textarea.value;
             
-            if (start === end) return; // Nada selecionado
+            // Se não tiver nada selecionado e for lista, insere um item vazio
+            if (start === end && type !== 'list') return; 
 
             const before = text.substring(0, start);
             const selected = text.substring(start, end);
             const after = text.substring(end);
+            
+            let newText = '';
 
-            textarea.value = before + '<b>' + selected + '</b>' + after;
+            if (type === 'bold') {
+                newText = '<b>' + selected + '</b>';
+            } 
+            else if (type === 'red') {
+                newText = '<span style="color: red; font-weight: bold;">' + selected + '</span>';
+            } 
+            else if (type === 'list') {
+                // Se tiver texto selecionado, transforma em item de lista
+                // Se não, cria uma estrutura básica para o usuário preencher
+                const content = selected || 'Item da lista';
+                newText = `<ul>\n  <li>${content}</li>\n</ul>`;
+            }
+
+            // Insere o texto formatado
+            textarea.value = before + newText + after;
+
+            // Devolve o foco para o textarea (opcional, melhora usabilidade)
+            textarea.focus();
         }
     </script>
 
