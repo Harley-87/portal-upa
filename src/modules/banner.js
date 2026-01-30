@@ -11,7 +11,7 @@ export function initBanner() {
 
   const bannerImages = bannerCarousel.querySelectorAll('img');
   let currentBannerIndex = 0;
-  const INTERVAL_MS = 5000; // 5 segundos
+  const INTERVAL_MS = 15000; // 15 segundos
 
   function showNextBanner() {
     // 1. Remove a classe 'active' da imagem atual
