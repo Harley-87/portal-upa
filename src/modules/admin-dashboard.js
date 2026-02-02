@@ -339,10 +339,22 @@ async function saveData(collectionName, dataObj, formElement, uiSuffix) {
     }
 }
 
-async function handleDelete(collectionName, id) {
-    if(!confirm("Tem certeza que deseja excluir?")) return;
-    try { await deleteDoc(doc(db, collectionName, id)); } catch (err) { alert("Erro ao apagar."); }
-}
+// 1. Usamos 'window.handleDelete' para que o HTML consiga encontrar a função
+window.handleDelete = async function(collectionName, id) {
+    
+    // 2. IMPORTANTE: O Google Sites bloqueia o 'confirm' nativo.
+    // Para o botão funcionar, precisamos comentar/remover a confirmação ou criar um modal próprio.
+    // Por enquanto, vou comentar para liberar a exclusão:
+    
+    // if(!confirm("Tem certeza que deseja excluir?")) return; 
+
+    try { 
+        await deleteDoc(doc(db, collectionName, id)); 
+        console.log("Item excluído com sucesso:", id);
+    } catch (err) { 
+        console.error("Erro ao excluir:", err);
+    }
+};
 
 function initUserManagement() {
     const formUser = document.getElementById('formUser');
