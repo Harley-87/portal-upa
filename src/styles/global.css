@@ -7,12 +7,34 @@
   padding: 0;
 }
 
+/* NOVO Estilização da Barra de Rolagem (Adicione aqui) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cor-primaria);
+}
+
 body {
   font-family: var(--fonte-principal);
   background-color: var(--cor-fundo);
   color: var(--cor-texto);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased; /* Renderização de fonte mais suave */
+}
+
+/* NOVO Adicione isso para títulos mais modernos */
+h1, h2, h3, h4 {
+  letter-spacing: -0.025em;
+  font-weight: 700;
+  color: #2d3748; /* Ou uma cor escura da sua paleta */
 }
 
 a { text-decoration: none; }
@@ -28,34 +50,68 @@ a { text-decoration: none; }
   flex-wrap: wrap;
 }
 
-/* Atualize a classe .footer existente */
+/* NOVO bloco */
+.calendar-day {
+  background: #ffffff;
+  border-radius: 10px; /* Cantos arredondados */
+  padding: 10px;
+  min-height: 80px;
+  border: 1px solid #edf2f7; /* Borda bem clarinha */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Sombra suave */
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.calendar-day:hover {
+  transform: translateY(-3px); /* Levanta o card */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-color: var(--cor-primaria);
+}
+
+/* Bloco novo para o Modal de Eventos */
+#eventModal {
+  border: none;
+  border-radius: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px); /* Efeito de vidro */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 400px;
+  width: 90%;
+}
+
+#eventModal::backdrop {
+  background: rgba(0, 0, 0, 0.4); /* Escurece o fundo ao abrir */
+}
+
+/* Substitua sua .footer por esta */
 .footer {
-  background-color: #343a40;
-  color: #adb5bd;
+  background-color: #ffffff; 
+  color: #4a5568;
   text-align: center;
-  padding: 30px 15px;
+  padding: 40px 20px;
   margin-top: 50px;
   font-size: 0.9em;
-  border-top: 4px solid var(--cor-primaria);
+  border-top: 1px solid #edf2f7; /* Troquei a borda grossa por uma fina */
+  box-shadow: 0 -10px 15px -3px rgba(0, 0, 0, 0.02);
 }
 
-.footer-dev {
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid #495057;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-  font-size: 0.8em;
-}
-
+/* Substitua sua .btn-report por esta */
 .btn-report {
-  color: #adb5bd;
+  color: #718096;
   text-decoration: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f7fafc;
+  border-radius: 8px;
   transition: 0.3s;
+  border: 1px solid #e2e8f0;
 }
-.btn-report:hover { color: #fff; }
+
+.btn-report:hover {
+  background: var(--cor-primaria);
+  color: #fff;
+  border-color: var(--cor-primaria);
+}

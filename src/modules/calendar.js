@@ -20,6 +20,14 @@ const MUNICIPAL_HOLIDAYS = {
   '28-10': 'Dia do Servidor (PF)'
 };
 
+// Sobreposições Manuais. O que você colocar aqui esmaga a API.
+// Use false para ignorar um feriado da API, ou escreva o nome com (PF) para mudar o tipo.
+const CUSTOM_OVERRIDES = {
+  '2025-06-19': 'Corpus Christi (PF)', // Força a ser Ponto Facultativo neste ano específico
+  '2025-11-20': 'Consciência Negra',   // Exemplo: Força a ser feriado se a API falhar
+  // '2025-09-07': false               // Exemplo de como cancelar um feriado da API
+};
+
 // --- Função Auxiliar para Buscar Eventos ---
 async function fetchEvents() {
   const querySnapshot = await getDocs(collection(db, "events"));
@@ -232,6 +240,15 @@ async function getHolidays(year) {
   const movable = calculateMovableHolidays(year);
   holidaysMap = { ...holidaysMap, ...movable };
 
+  // --- O QUE ADICIONAR: Aplicar as sobreposições manuais ---
+  for (const [dateKey, customName] of Object.entries(CUSTOM_OVERRIDES)) {
+    if (customName === false) {
+      delete holidaysMap[dateKey]; // Remove a data se você definiu como false
+    } else {
+      holidaysMap[dateKey] = customName; // Sobrescreve com a sua regra (ex: adicionando o PF)
+    }
+  }
+
   holidaysCache[year] = holidaysMap;
   return holidaysMap;
 }
@@ -260,7 +277,7 @@ function calculateMovableHolidays(year) {
   holidays[formatDate(goodFriday)] = 'Paixão de Cristo';
 
   const corpusChristi = addDays(easter, 60);
-  holidays[formatDate(corpusChristi)] = 'Corpus Christi';
+  holidays[formatDate(corpusChristi)] = 'Corpus Christi (PF)';
 
   return holidays;
 }
